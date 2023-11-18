@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Nov 17, 2023 at 05:16 AM
+-- Generation Time: Nov 18, 2023 at 02:04 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -39,6 +39,17 @@ CREATE TABLE `example1` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `example2`
+--
+
+CREATE TABLE `example2` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `name` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -61,6 +72,12 @@ ALTER TABLE `example1`
   ADD KEY `user_id` (`user_id`);
 
 --
+-- Indexes for table `example2`
+--
+ALTER TABLE `example2`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -75,6 +92,12 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `example1`
 --
 ALTER TABLE `example1`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `example2`
+--
+ALTER TABLE `example2`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --

@@ -13,6 +13,9 @@ class PRC
 	protected $appPathUrl = 'http://localhost/PRC';
 	protected $dbConn;
 	protected $tblName;
+	protected $tbl;
+	protected $tblNameUcF;
+	protected $isTblNamePlural = true;
 	protected $tblCols;
 	protected $showHTML = true;
 	protected $auth = false;
@@ -41,6 +44,8 @@ class PRC
 			'example' // Database name, notice no ","
 		);
 
+		$this->tblNameUcF = ucfirst($this->tblName ?? false);
+
 		if ($this->showHTML) {
 			?>
 			<!doctype html>
@@ -64,10 +69,18 @@ class PRC
 					$all = array_diff(scandir($dir), [".", "..", ".git"]);
 
 					foreach ($all as $ff) {
-						if (is_dir($dir . $ff)) { 
-							echo "<a href=\"{$this->appPathUrl}/{$ff}\">{$ff}</a> |";
-						}
-					}
+						if (is_dir($dir . $ff)) {
+							// pr($ff,'$ff');
+							// pr($this->tblName,'$this->tblName');
+
+							if ($ff == $this->tblNameUcF) {
+								echo "<strong>{$ff}</strong> | ";
+							}
+							else {
+								echo "<a href=\"{$this->appPathUrl}/{$ff}\">{$ff}</a> | ";
+							} // if 
+						} // if is_dir
+					} // foreach all
 					?>
 					<a href="<?= $this->appPathUrl ?>/Logout.php">Logout</a>
 				</nav>
@@ -89,6 +102,7 @@ class PRC
 			$headers .= "<th scope=\"col\">{$tblCol['display as']}</th>";
 			$fields .= "{$this->tblName}.{$key}, ";
 			$displayColCount++;
+			// Maybe limit headers/values to 10 or some columns
 		} // foreach (tblCols)
 
 		$fields = rtrim($fields,', ');
@@ -107,10 +121,10 @@ class PRC
 			// print_r($cols);
 		} // if ($result->num_rows)
 
-		$tblNameUcF = ucfirst($this->tblName);
+		// $tblNameUcF = ucfirst($this->tblName);
 		?>
 		<main>
-			<h2><?= $tblNameUcF ?> <a href="<?= $this->appPathUrl.'/'.$tblNameUcF ?>/Add.php" style="text-decoration: none;">+ <small>(add new record)</small></a></h2>
+			<h2><?= $this->tblNameUcF ?> <a href="<?= $this->appPathUrl.'/'.$this->tblNameUcF ?>/Add.php" style="text-decoration: none;">+ <small>(add new record)</small></a></h2>
 			<table style="width:100%">
 				<?php
 				if (mysqli_num_rows($result)) {
@@ -141,7 +155,7 @@ class PRC
 									echo "<td>{$row[$key]}</td>";
 								} // foreach (tblCols)
 
-								echo '<td><a href="#">Edit</a> | <a href="#">Delete</a></td>';
+								echo "<td><a href=\"{$this->appPathUrl}/{$this->tblNameUcF}/View.php\">View</a> | <a href=\"#\">Edit</a> | <a href=\"#\">Delete</a></td>";
 								?>
 							</tr>
 							<?php
@@ -159,30 +173,85 @@ class PRC
 		<?php
 	} // list()
 
-	function add()
+	function view()
 	{
-		echo '<pre><h1>$_POST</h1>';
-		print_r($_POST);
-		echo '</pre>';
+		$fields = '';
+
+		foreach ($this->tblCols as $key => $tblCol) {
+			if ($tblCol['is display']['on view'] === false) {
+				continue;
+			}
+			
+			$fields .= "{$this->tblName}.{$key}, ";
+			// Maybe limit headers/values to 10 or some columns
+		} // foreach (tblCols)
+		
+		$fields = rtrim($fields,', ');
+
+		$sql = "SELECT $fields FROM {$this->tblName} {$this->auth};";
+		// print_r($sql);
+
+		$result = mysqli_query(
+			$this->dbConn,
+			$sql
+		);
+
+		if (mysqli_num_rows($result)) {
+			$row = mysqli_fetch_assoc($result);
+			$cols = array_keys($row);
+			// print_r($cols);
+		} // if ($result->num_rows)
+
+		// $tblNameUcF = ucfirst($this->tblName);
 		?>
 		<main>
-			<h2>Add <?= ucfirst(rtrim($this->tblName,'s')) ?></h2>
+			<h2><?= $this->tblNameUcF ?></h2>
+			
+		</main>
+		<?php
+	} // view
+
+	function add()
+	{
+		$this->pr($_POST,'$_POST');
+		$tblName = ucfirst($this->isTblNamePlural ? rtrim($this->tblName,'s') : $this->tblName);
+		?>
+		<main>
+			<h2>Add <?= $tblName ?></h2>
 			<form method="post">
 				<?php
 				foreach ($this->tblCols as $key => $tblCol) {
 					if ($tblCol['is display']['on add'] === false) {
 						continue;
 					}
+
+					// $this->pr($key,'$key');
+					// $this->pr($tblCol,'$tblCol');
+
+					// switch ($key) {
+					// 	case 'date':
+					// 		break;
+						
+					// 	default:
+					// 		break;
+					// } // switch key
 					?>
 					<div>
-						<input name="<?= $key ?>" id="<?= $key ?>" placeholder="Enter <?= $key ?>">
 						<label for="<?= $key ?>"><?= $tblCol['display as'] ?></label>
+						<input
+							type="<?= $tblCol['type'] ?>"
+							name="<?= $key ?>"
+							id="<?= $key ?>"
+							placeholder="Enter <?= $key ?>"
+							value="<?= $_POST[$key] ? $_POST[$key] : '' ?>"
+							<?= $tblCol['is required'] ? 'required' : '' ?>
+						>
 					</div>
 					<?php
 				} // foreach
 				?>
 				<br>
-				<button class="btn btn-primary py-2" type="submit">Add <?= ucfirst(rtrim($this->tblName,'s')) ?></button>
+				<button class="btn btn-primary py-2" type="submit">Add <?= $tblName ?></button>
 			</form>
 		</main>
 		<?php
@@ -350,3 +419,12 @@ class PRC
 		mysqli_close($this->dbConn); // optional
 	} // __destruct()
 } // class PRC
+
+function pr($value,$name)
+{
+	$count = is_countable($value) ? count($value) : null;
+
+	echo "<pre><h1>Name: {$name}, <small>Count:{$count}</small></h1>";
+	print_r($value);
+	echo '</pre>';
+} // pr()

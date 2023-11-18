@@ -6,4 +6,4 @@ error_reporting(E_ALL);
 require 'Example1.php';
 
 $example1 = new Example1();
-$example1->add();
+$example1->view();

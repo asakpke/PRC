@@ -2,15 +2,14 @@
 
 require '../PRC.php';
 
-class Example1 extends PRC 
+class Example2 extends PRC 
 {
     function __construct()
     {
-      $this->tblName = 'example1';
+      $this->tblName = 'example2';
 
       parent::__construct();
 
-      $this->auth = "WHERE user_id = {$_SESSION['user_id']}"; // we may adjust or fix it later on
       $this->tblCols = array(
         'id' => array(
           'type' => 'text',
@@ -33,17 +32,6 @@ class Example1 extends PRC
             'on edit' => true,
           ),
           'is required' => true,
-        ),
-        'date' => array(
-          'type' => 'date',
-          'display as' => 'Date',
-          'is display' => array(
-            'on listing' => true,
-            'on view' => true,
-            'on add' => true,
-            'on edit' => true,
-          ),
-          'is required' => false,
         ),
       );
     } // __construct()
