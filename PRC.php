@@ -5,8 +5,8 @@ class PRC
 	protected $appName = 'PHP RAD CRUD';
 	protected $appNameShort = 'PRC';
 	protected $appDesc = 'PHP - PHP: Hypertext Preprocessor
-												RAD - Rapid Application Development
-												CRUD - Create, Read, Update and Delete';
+		RAD - Rapid Application Development
+		CRUD - Create, Read, Update and Delete';
 	protected $appVersion = 	'0.1.0';										
 	protected $appAuthor = 	'Aamir Shahzad';
 	protected $appPath = '/opt/lampp/htdocs/PRC';
