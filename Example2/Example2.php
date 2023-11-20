@@ -10,7 +10,7 @@ class Example2 extends PRC
 
       parent::__construct();
 
-      $this->tblCols = array(
+      $this->tbl['cols'] = array(
         'id' => array(
           'type' => 'text',
           'display as' => 'ID',

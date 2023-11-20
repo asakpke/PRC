@@ -6,4 +6,4 @@ error_reporting(E_ALL);
 require 'PRC.php';
 
 $prc = new PRC();
-$prc->dashboard();
+$prc->index();

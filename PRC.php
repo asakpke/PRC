@@ -2,37 +2,35 @@
 
 class PRC
 {
-	protected $appName = 'PHP RAD CRUD';
-	protected $appNameShort = 'PRC';
-	protected $appDesc = 'PHP - PHP: Hypertext Preprocessor
-		RAD - Rapid Application Development
-		CRUD - Create, Read, Update and Delete';
-	protected $appVersion = 	'0.1.0';										
-	protected $appAuthor = 	'Aamir Shahzad';
-	protected $appPath = '/opt/lampp/htdocs/PRC';
-	protected $appPathUrl = 'http://localhost/PRC';
+	protected $app = array(
+		'name' => 'PHP RAD CRUD',
+		'nameShort' => 'PRC',
+		'desc' => 'PHP - PHP: Hypertext Preprocessor <br>
+			RAD - Rapid Application Development <br>
+			CRUD - Create, Read, Update and Delete <br>',
+		'version' => '0.1.1',
+		'author' => 'Aamir Shahzad',
+		'path' => '/opt/lampp/htdocs/PRC',
+		'pathUrl' => 'http://localhost/PRC',
+	);
 	protected $dbConn;
-	protected $tblName;
-	protected $tbl;
-	protected $tblNameUcF;
-	protected $isTblNamePlural = true;
-	protected $tblCols;
+	protected $tbl = array(
+		'name',
+		'nameUcF',
+		'isPlural' => true,
+		'cols' => true,
+	);
 	protected $showHTML = true;
-	protected $auth = false;
 
 	function __construct($opt = null)
 	{
 		session_start();
 
-		// if (!empty($opt['is login page'])) {
-		// 	exit;
-		// }
-
 		// START - Redirect to login page if user is not logged-in
 		if (empty($_SESSION['user_id']) and empty($opt['is login page'])) {
 			$msg = 'Please login to view this page.';
 			$color = 'red';
-			header("Location: {$this->appPathUrl}/Login.php?msg={$msg}&color={$color}");
+			header("Location: {$this->app['pathUrl']}/Login.php?msg={$msg}&color={$color}");
 			exit;
 		}
 		// ENDED - Redirect to login page if user is not logged-in
@@ -44,7 +42,7 @@ class PRC
 			'example' // Database name, notice no ","
 		);
 
-		$this->tblNameUcF = ucfirst($this->tblName ?? false);
+		$this->tbl['nameUcF'] = ucfirst($this->tbl['name'] ?? false);
 
 		if ($this->showHTML) {
 			?>
@@ -53,36 +51,36 @@ class PRC
 				<head>
 						<meta charset="utf-8">
 						<meta name="viewport" content="width=device-width, initial-scale=1">
-						<meta name="description" content="<?= $this->appDesc ?>">
-						<meta name="author" content="<?= $this->appAuthor ?>">
-						<meta name="generator" content="<?= $this->appNameShort.' '.$this->appVersion ?>">
-						<title><?= $this->appNameShort.' - '.$this->appName ?></title>
-						<link href="<?= $this->appPathUrl ?>/style.css" rel="stylesheet">
+						<meta name="description" content="<?= $this->app['desc'] ?>">
+						<meta name="author" content="<?= $this->app['author'] ?>">
+						<meta name="generator" content="<?= $this->app['nameShort'].' '.$this->app['version'] ?>">
+						<title><?= $this->app['nameShort'].' - '.$this->app['name'] ?></title>
+						<link href="<?= $this->app['pathUrl'] ?>/style.css" rel="stylesheet">
 				</head>
 				<body>
 				<header>
-					<h1><?= $this->appName ?></h1>
+					<h1><?= $this->app['name'] ?></h1>
 				</header>
 				<nav>
 					<?php
-					$dir = $this->appPath.'/';
+					$dir = $this->app['path'].'/';
 					$all = array_diff(scandir($dir), [".", "..", ".git"]);
 
 					foreach ($all as $ff) {
 						if (is_dir($dir . $ff)) {
 							// pr($ff,'$ff');
-							// pr($this->tblName,'$this->tblName');
+							// pr($this->tbl['name'],'$this->tbl['name']');
 
-							if ($ff == $this->tblNameUcF) {
+							if ($ff == $this->tbl['nameUcF']) {
 								echo "<strong>{$ff}</strong> | ";
 							}
 							else {
-								echo "<a href=\"{$this->appPathUrl}/{$ff}\">{$ff}</a> | ";
+								echo "<a href=\"{$this->app['pathUrl']}/{$ff}\">{$ff}</a> | ";
 							} // if 
 						} // if is_dir
 					} // foreach all
 					?>
-					<a href="<?= $this->appPathUrl ?>/Logout.php">Logout</a>
+					<a href="<?= $this->app['pathUrl'] ?>/Logout.php">Logout</a>
 				</nav>
 			<?php
 		} // if ($this->showHTML)
@@ -94,20 +92,21 @@ class PRC
 		$fields = '';
 		$displayColCount = 0;
 
-		foreach ($this->tblCols as $key => $tblCol) {
+		foreach ($this->tbl['cols'] as $key => $tblCol) {
 			if ($tblCol['is display']['on listing'] === false) {
 				continue;
 			}
 			
 			$headers .= "<th scope=\"col\">{$tblCol['display as']}</th>";
-			$fields .= "{$this->tblName}.{$key}, ";
+			$fields .= "{$this->tbl['name']}.{$key}, ";
 			$displayColCount++;
 			// Maybe limit headers/values to 10 or some columns
-		} // foreach (tblCols)
+		} // foreach (tbl['cols'])
 
 		$fields = rtrim($fields,', ');
 
-		$sql = "SELECT $fields FROM {$this->tblName} {$this->auth};";
+		$sql = "SELECT $fields FROM {$this->tbl['name']};";
+		// $sql = "SELECT $fields FROM {$this->tbl['name']} {$this->auth};";
 		// print_r($sql);
 
 		$result = mysqli_query(
@@ -121,10 +120,10 @@ class PRC
 			// print_r($cols);
 		} // if ($result->num_rows)
 
-		// $tblNameUcF = ucfirst($this->tblName);
+		// $tbl['nameUcF'] = ucfirst($this->tbl['name']);
 		?>
 		<main>
-			<h2><?= $this->tblNameUcF ?> <a href="<?= $this->appPathUrl.'/'.$this->tblNameUcF ?>/Add.php" style="text-decoration: none;">+ <small>(add new record)</small></a></h2>
+			<h2><?= $this->tbl['nameUcF'] ?> <a href="<?= $this->app['pathUrl'].'/'.$this->tbl['nameUcF'] ?>/Add.php" style="text-decoration: none;">+ <small>(add new record)</small></a></h2>
 			<table style="width:100%">
 				<?php
 				if (mysqli_num_rows($result)) {
@@ -147,15 +146,15 @@ class PRC
 							?>
 							<tr>
 								<?php
-								foreach ($this->tblCols as $key => $tblCol) {
+								foreach ($this->tbl['cols'] as $key => $tblCol) {
 									if ($tblCol['is display']['on listing'] === false) {
 										continue;
 									}
 									
 									echo "<td>{$row[$key]}</td>";
-								} // foreach (tblCols)
+								} // foreach (tbl['cols'])
 
-								echo "<td><a href=\"{$this->appPathUrl}/{$this->tblNameUcF}/View.php\">View</a> | <a href=\"#\">Edit</a> | <a href=\"#\">Delete</a></td>";
+								echo "<td><a href=\"{$this->app['pathUrl']}/{$this->tbl['nameUcF']}/View.php\">View</a> | <a href=\"#\">Edit</a> | <a href=\"#\">Delete</a></td>";
 								?>
 							</tr>
 							<?php
@@ -177,18 +176,19 @@ class PRC
 	{
 		$fields = '';
 
-		foreach ($this->tblCols as $key => $tblCol) {
+		foreach ($this->tbl['cols'] as $key => $tblCol) {
 			if ($tblCol['is display']['on view'] === false) {
 				continue;
 			}
 			
-			$fields .= "{$this->tblName}.{$key}, ";
+			$fields .= "{$this->tbl['name']}.{$key}, ";
 			// Maybe limit headers/values to 10 or some columns
-		} // foreach (tblCols)
+		} // foreach (tbl['cols'])
 		
 		$fields = rtrim($fields,', ');
 
-		$sql = "SELECT $fields FROM {$this->tblName} {$this->auth};";
+		$sql = "SELECT $fields FROM {$this->tbl['name']};";
+		// $sql = "SELECT $fields FROM {$this->tbl['name']} {$this->auth};";
 		// print_r($sql);
 
 		$result = mysqli_query(
@@ -202,10 +202,10 @@ class PRC
 			// print_r($cols);
 		} // if ($result->num_rows)
 
-		// $tblNameUcF = ucfirst($this->tblName);
+		// $tbl['nameUcF'] = ucfirst($this->tbl['name']);
 		?>
 		<main>
-			<h2><?= $this->tblNameUcF ?></h2>
+			<h2><?= $this->tbl['nameUcF'] ?></h2>
 			
 		</main>
 		<?php
@@ -214,13 +214,13 @@ class PRC
 	function add()
 	{
 		$this->pr($_POST,'$_POST');
-		$tblName = ucfirst($this->isTblNamePlural ? rtrim($this->tblName,'s') : $this->tblName);
+		$tbl['name'] = ucfirst($this->tbl['isPlural'] ? rtrim($this->tbl['name'],'s') : $this->tbl['name']);
 		?>
 		<main>
-			<h2>Add <?= $tblName ?></h2>
+			<h2>Add <?= $tbl['name'] ?></h2>
 			<form method="post">
 				<?php
-				foreach ($this->tblCols as $key => $tblCol) {
+				foreach ($this->tbl['cols'] as $key => $tblCol) {
 					if ($tblCol['is display']['on add'] === false) {
 						continue;
 					}
@@ -251,7 +251,7 @@ class PRC
 				} // foreach
 				?>
 				<br>
-				<button class="btn btn-primary py-2" type="submit">Add <?= $tblName ?></button>
+				<button class="btn btn-primary py-2" type="submit">Add <?= $tbl['name'] ?></button>
 			</form>
 		</main>
 		<?php
@@ -261,7 +261,8 @@ class PRC
 	{
 		$stmt = mysqli_prepare(
 			$this->dbConn,
-			"SELECT {$this->tblName}.$name FROM {$this->tblName} {$this->auth} AND {$this->tblName}.id = ? LIMIT 1;"
+			"SELECT {$this->tbl['name']}.$name FROM {$this->tbl['name']} WHERE {$this->tbl['name']}.id = ? LIMIT 1;"
+			// "SELECT {$this->tbl['name']}.$name FROM {$this->tbl['name']} {$this->auth} AND {$this->tbl['name']}.id = ? LIMIT 1;"
 		);
 
 		// print_r($result);
@@ -302,7 +303,7 @@ class PRC
 
 			$msg = 'Signup successfully, please login.';
 			$color = 'green';
-			header("Location: {$this->appPathUrl}/Login.php?msg={$msg}&color={$color}");
+			header("Location: {$this->app['pathUrl']}/Login.php?msg={$msg}&color={$color}");
 			exit;
 		} // if post
 		?>
@@ -350,13 +351,13 @@ class PRC
 				if (!empty($row)) {
 					$_SESSION['user_id'] = $row['id'];
 					$color = 'green';
-					header("Location: {$this->appPathUrl}/Dashboard.php?msg={$msg}&color={$color}");
+					header("Location: {$this->app['pathUrl']}/index.php?msg={$msg}&color={$color}");
 					exit();
 				}
 				else {
 					$msg = 'Invalid email/password.';
 					$color = 'red';
-					header("Location: {$this->appPathUrl}/Login.php?msg={$msg}&color={$color}");
+					header("Location: {$this->app['pathUrl']}/Login.php?msg={$msg}&color={$color}");
 					exit();
 				}
 			} // if ($stmt->execute() === true)
@@ -387,21 +388,21 @@ class PRC
 		<?php
 	} // login()
 
-	function dashboard()
+	function index()
 	{
 		?>
 		<main>
-			<p>Welcome to the dashboard.</p>
+			<p>Welcome to the index.</p>
 		</main>
 		<?php
-	} // dashboard()
+	} // index()
 
 	function logout()
 	{
 		$_SESSION['user_id'] = 0;
 		$msg = 'You are logged out successfully.';
 		$color = 'green';
-		header("Location: {$this->appPathUrl}/Login.php?msg={$msg}&color={$color}");
+		header("Location: {$this->app['pathUrl']}/Login.php?msg={$msg}&color={$color}");
 		exit;
 	} // logout()
 
@@ -409,7 +410,7 @@ class PRC
 		if ($this->showHTML) {
 				?>
 				<footer>
-					<h6><?= $this->appNameShort.' - '.$this->appVersion ?> &copy; 2023</h6>
+					<h6><?= $this->app['nameShort'].' - '.$this->app['version'] ?> &copy; 2023</h6>
 				</footer>
 				</body>
 				</html>
