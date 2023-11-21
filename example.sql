@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Nov 18, 2023 at 02:04 AM
+-- Generation Time: Nov 21, 2023 at 04:12 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -30,10 +30,9 @@ USE `example`;
 --
 
 CREATE TABLE `example1` (
-  `user_id` int(10) UNSIGNED NOT NULL,
   `id` int(10) UNSIGNED NOT NULL,
   `name` varchar(255) NOT NULL,
-  `date` date DEFAULT NULL
+  `desc` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -68,8 +67,7 @@ CREATE TABLE `users` (
 -- Indexes for table `example1`
 --
 ALTER TABLE `example1`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `example2`
@@ -105,16 +103,6 @@ ALTER TABLE `example2`
 --
 ALTER TABLE `users`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `example1`
---
-ALTER TABLE `example1`
-  ADD CONSTRAINT `example1_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

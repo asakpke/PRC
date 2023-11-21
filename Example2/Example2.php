@@ -6,7 +6,7 @@ class Example2 extends PRC
 {
     function __construct()
     {
-      $this->tblName = 'example2';
+      $this->tbl['name'] = 'example2';
 
       parent::__construct();
 

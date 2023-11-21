@@ -1,4 +1,5 @@
 <?php
+session_start();
 
 class PRC
 {
@@ -12,6 +13,8 @@ class PRC
 		'author' => 'Aamir Shahzad',
 		'path' => '/opt/lampp/htdocs/PRC',
 		'pathUrl' => 'http://localhost/PRC',
+		// 'isSignup' => false,
+		'isSignup' => true,
 	);
 	protected $dbConn;
 	protected $tbl = array(
@@ -24,10 +27,8 @@ class PRC
 
 	function __construct($opt = null)
 	{
-		session_start();
-
 		// START - Redirect to login page if user is not logged-in
-		if (empty($_SESSION['user_id']) and empty($opt['is login page'])) {
+		if (empty($_SESSION['user']) and empty($opt['is login page'])) {
 			$msg = 'Please login to view this page.';
 			$color = 'red';
 			header("Location: {$this->app['pathUrl']}/Login.php?msg={$msg}&color={$color}");
@@ -48,66 +49,44 @@ class PRC
 			?>
 			<!doctype html>
 			<html lang="en">
-				<head>
-						<meta charset="utf-8">
-						<meta name="viewport" content="width=device-width, initial-scale=1">
-						<meta name="description" content="<?= $this->app['desc'] ?>">
-						<meta name="author" content="<?= $this->app['author'] ?>">
-						<meta name="generator" content="<?= $this->app['nameShort'].' '.$this->app['version'] ?>">
-						<title><?= $this->app['nameShort'].' - '.$this->app['name'] ?></title>
-						<link href="<?= $this->app['pathUrl'] ?>/style.css" rel="stylesheet">
-				</head>
-				<body>
-				<header>
-					<h1><?= $this->app['name'] ?></h1>
-				</header>
-				<nav>
-					<?php
+			<head>
+					<meta charset="utf-8">
+					<meta name="viewport" content="width=device-width, initial-scale=1">
+					<meta name="description" content="<?= $this->app['desc'] ?>">
+					<meta name="author" content="<?= $this->app['author'] ?>">
+					<meta name="generator" content="<?= $this->app['nameShort'].' '.$this->app['version'] ?>">
+					<title><?= $this->app['nameShort'].' - '.$this->app['name'] ?></title>
+					<link href="<?= $this->app['pathUrl'] ?>/style.css?v=<?= $this->app['version'] ?>" rel="stylesheet">
+			</head>
+			<body>
+			<header>
+				<h1><a class="txt-dec" href="<?= $app['pathUrl'] ?>"><?= $this->app['name'] ?></a></h1>
+			</header>
+			<nav>
+				<?php
+				if (!empty($_SESSION['user'])) {
 					$dir = $this->app['path'].'/';
 					$all = array_diff(scandir($dir), [".", "..", ".git"]);
 
 					foreach ($all as $ff) {
 						if (is_dir($dir . $ff)) {
-							// pr($ff,'$ff');
-							// pr($this->tbl['name'],'$this->tbl['name']');
-
-							if ($ff == $this->tbl['nameUcF']) {
-								echo "<strong>{$ff}</strong> | ";
-							}
-							else {
-								echo "<a href=\"{$this->app['pathUrl']}/{$ff}\">{$ff}</a> | ";
-							} // if 
+							echo "<a href=\"{$this->app['pathUrl']}/{$ff}\">{$ff}</a> | ";
 						} // if is_dir
 					} // foreach all
-					?>
-					<a href="<?= $this->app['pathUrl'] ?>/Logout.php">Logout</a>
-				</nav>
+
+					echo '<a href="'.$this->app['pathUrl'].'/Logout.php">Logout</a>';
+				}
+				?>
+			</nav>
 			<?php
 		} // if ($this->showHTML)
 	} // __construct()
 
 	function list()
 	{
-		$headers = '';
-		$fields = '';
-		$displayColCount = 0;
+		$cols = $this->getCols('on listing');
 
-		foreach ($this->tbl['cols'] as $key => $tblCol) {
-			if ($tblCol['is display']['on listing'] === false) {
-				continue;
-			}
-			
-			$headers .= "<th scope=\"col\">{$tblCol['display as']}</th>";
-			$fields .= "{$this->tbl['name']}.{$key}, ";
-			$displayColCount++;
-			// Maybe limit headers/values to 10 or some columns
-		} // foreach (tbl['cols'])
-
-		$fields = rtrim($fields,', ');
-
-		$sql = "SELECT $fields FROM {$this->tbl['name']};";
-		// $sql = "SELECT $fields FROM {$this->tbl['name']} {$this->auth};";
-		// print_r($sql);
+		$sql = "SELECT {$cols['fields']} FROM {$this->tbl['name']};";
 
 		$result = mysqli_query(
 			$this->dbConn,
@@ -116,14 +95,14 @@ class PRC
 
 		if (mysqli_num_rows($result)) {
 			$row = mysqli_fetch_assoc($result);
-			$cols = array_keys($row);
-			// print_r($cols);
-		} // if ($result->num_rows)
-
-		// $tbl['nameUcF'] = ucfirst($this->tbl['name']);
+			// $cols = array_keys($row);
+		} // if num_rows
 		?>
 		<main>
 			<h2><?= $this->tbl['nameUcF'] ?> <a href="<?= $this->app['pathUrl'].'/'.$this->tbl['nameUcF'] ?>/Add.php" style="text-decoration: none;">+ <small>(add new record)</small></a></h2>
+			<?php
+			showMsg();
+			?>
 			<table style="width:100%">
 				<?php
 				if (mysqli_num_rows($result)) {
@@ -131,13 +110,13 @@ class PRC
 					<thead>
 						<tr>
 							<?php
-							echo $headers;
+							echo $cols['headers'];
 							echo '<th scope="col">Action</th>';
 							?>
 						</tr>
 					</thead>
 					<?php
-				} // if ($result->num_rows)
+				} // if num_rows
 				?>
 				<tbody>
 					<?php
@@ -146,8 +125,8 @@ class PRC
 							?>
 							<tr>
 								<?php
-								foreach ($this->tbl['cols'] as $key => $tblCol) {
-									if ($tblCol['is display']['on listing'] === false) {
+								foreach ($this->tbl['cols'] as $key => $col) {
+									if ($col['is display']['on listing'] === false) {
 										continue;
 									}
 									
@@ -159,12 +138,12 @@ class PRC
 							</tr>
 							<?php
 						} while ($row = mysqli_fetch_assoc($result));
-					} // if ($result->num_rows)
+					} // if num_rows
 					else {
 						?>
-						<tr><th colspan="<?= $displayColCount ?>" style="text-align:center;">No record found</th></tr>
+						<tr><th colspan="<?= $cols['count'] ?>" style="text-align:center;">No record found</th></tr>
 						<?php
-					} // else/if ($result->num_rows)
+					} // else/if num_rows
 					?>
 				</tbody>
 			</table>
@@ -176,8 +155,8 @@ class PRC
 	{
 		$fields = '';
 
-		foreach ($this->tbl['cols'] as $key => $tblCol) {
-			if ($tblCol['is display']['on view'] === false) {
+		foreach ($this->tbl['cols'] as $key => $col) {
+			if ($col['is display']['on view'] === false) {
 				continue;
 			}
 			
@@ -188,8 +167,6 @@ class PRC
 		$fields = rtrim($fields,', ');
 
 		$sql = "SELECT $fields FROM {$this->tbl['name']};";
-		// $sql = "SELECT $fields FROM {$this->tbl['name']} {$this->auth};";
-		// print_r($sql);
 
 		$result = mysqli_query(
 			$this->dbConn,
@@ -199,10 +176,8 @@ class PRC
 		if (mysqli_num_rows($result)) {
 			$row = mysqli_fetch_assoc($result);
 			$cols = array_keys($row);
-			// print_r($cols);
-		} // if ($result->num_rows)
-
-		// $tbl['nameUcF'] = ucfirst($this->tbl['name']);
+			pr($cols,'$cols');
+		} // if num_rows
 		?>
 		<main>
 			<h2><?= $this->tbl['nameUcF'] ?></h2>
@@ -213,45 +188,69 @@ class PRC
 
 	function add()
 	{
-		$this->pr($_POST,'$_POST');
-		$tbl['name'] = ucfirst($this->tbl['isPlural'] ? rtrim($this->tbl['name'],'s') : $this->tbl['name']);
+		$tblName = ucfirst($this->tbl['isPlural'] ? rtrim($this->tbl['name'],'s') : $this->tbl['name']);
+
+		if (!empty($_POST)) {
+			// pr($_POST,'$_POST');
+			$cols = $this->getCols('on add');
+			// pr($cols,'$cols');
+			$values = '';
+			$values = str_pad($values, $cols['count']*2-1, '?,'); // -1 to remove last ,
+			// pr($values,'$values');
+
+			$sql = "INSERT INTO {$this->tbl['name']}({$cols['fields']}) VALUES ({$values});";
+			// pr($sql,'$sql');
+			
+			$stmt = mysqli_prepare(
+				$this->dbConn,
+				$sql
+			);
+
+			$values = '';
+			$values = str_pad($values, $cols['count'], 's');
+			// pr($values,'$values');
+			
+			mysqli_stmt_bind_param(
+				$stmt,
+				$values, // i	int, d	float, s string
+				...array_values($_POST),
+			);
+			
+			mysqli_stmt_execute($stmt);
+
+			$msg = "{$this->tbl['nameUcF']} record added successfully.";
+			$color = 'green';
+			$loc = "{$this->app['pathUrl']}/{$this->tbl['nameUcF']}/index.php?msg={$msg}&color={$color}";
+			pr($loc,'$loc');
+			header("Location: $loc");
+			exit;
+		} // if post
 		?>
 		<main>
-			<h2>Add <?= $tbl['name'] ?></h2>
+			<h2>Add <?= $tblName ?></h2>
 			<form method="post">
 				<?php
-				foreach ($this->tbl['cols'] as $key => $tblCol) {
-					if ($tblCol['is display']['on add'] === false) {
+				foreach ($this->tbl['cols'] as $key => $col) {
+					if ($col['is display']['on add'] === false) {
 						continue;
 					}
-
-					// $this->pr($key,'$key');
-					// $this->pr($tblCol,'$tblCol');
-
-					// switch ($key) {
-					// 	case 'date':
-					// 		break;
-						
-					// 	default:
-					// 		break;
-					// } // switch key
 					?>
 					<div>
-						<label for="<?= $key ?>"><?= $tblCol['display as'] ?></label>
 						<input
-							type="<?= $tblCol['type'] ?>"
+							type="<?= $col['type'] ?>"
 							name="<?= $key ?>"
 							id="<?= $key ?>"
 							placeholder="Enter <?= $key ?>"
-							value="<?= $_POST[$key] ? $_POST[$key] : '' ?>"
-							<?= $tblCol['is required'] ? 'required' : '' ?>
+							value="<?= $_POST[$key] ?? '' ?>"
+							<?= $col['is required'] ? 'required' : '' ?>
 						>
+						<label for="<?= $key ?>"><?= $col['display as'] ?></label>
 					</div>
 					<?php
 				} // foreach
 				?>
 				<br>
-				<button class="btn btn-primary py-2" type="submit">Add <?= $tbl['name'] ?></button>
+				<button class="btn btn-primary py-2" type="submit">Add <?= $tblName ?></button>
 			</form>
 		</main>
 		<?php
@@ -281,11 +280,14 @@ class PRC
 
 	function signup()
 	{
-		// echo '<pre><h1>$_POST</h1>';
-		// print_r($_POST);
-		// echo '</pre>';
+		if ($this->app['isSignup'] === false) {
+			$msg = 'Signup disabled.';
+			$color = 'red';
+			header("Location: {$this->app['pathUrl']}/Login.php?msg={$msg}&color={$color}");
+			exit;
+		}
 
-		if (!empty($_POST['email'])) {
+		if (!empty($_POST)) {
 			$stmt = mysqli_prepare(
 				$this->dbConn,
 				'INSERT INTO users VALUES (null, ?, ?, ?);'
@@ -311,7 +313,7 @@ class PRC
       <form method="post">
         <h2 class="">Sign Up</h2>
 				<div>
-          <input name="name" type="name" id="name" placeholder="name@example.com">
+          <input name="name" type="name" id="name" placeholder="Name">
 					<label for="name">Name</label>
         </div>
         <div>
@@ -330,10 +332,10 @@ class PRC
 
 	function login()
 	{
-		if (!empty($_POST['email'])) {
+		if (!empty($_POST)) {
 			$stmt = mysqli_prepare(
 				$this->dbConn,
-				"SELECT id FROM users WHERE email=? AND password=? LIMIT 1"
+				"SELECT * FROM users WHERE email=? AND password=? LIMIT 1"
 			);
 
 			$_POST['password'] = md5($_POST['password']);
@@ -349,7 +351,8 @@ class PRC
 				$row = $result->fetch_assoc();
 
 				if (!empty($row)) {
-					$_SESSION['user_id'] = $row['id'];
+					// $_SESSION['user_id'] = $row['id'];
+					$_SESSION['user'] = $row;
 					$color = 'green';
 					header("Location: {$this->app['pathUrl']}/index.php?msg={$msg}&color={$color}");
 					exit();
@@ -367,11 +370,7 @@ class PRC
       <form method="post">
         <h2 class="">Login</h2>
 				<?php
-				if (!empty($_GET['msg'])) {
-					echo "<p style=\"color:{$_GET['color']}\">{$_GET['msg']}</p>";
-					$_GET['msg'] = '';
-					$_GET['color'] = '';
-				} // if GET msg
+				showMsg();
 				?>
         <div>
           <input name="email" type="email" id="email" placeholder="name@example.com">
@@ -382,7 +381,7 @@ class PRC
 					<label for="password">Password</label>
         </div>
         <button type="submit">Login</button>
-				<a href="Signup.php">Signup</a>
+				<?= $this->app['isSignup'] ? '<a href="Signup.php">Signup</a>' : '' ?>
       </form>
     </main>
 		<?php
@@ -392,25 +391,47 @@ class PRC
 	{
 		?>
 		<main>
-			<p>Welcome to the index.</p>
+			<p>Welcome back <?= $_SESSION['user']['name'] ?>.</p>
 		</main>
 		<?php
 	} // index()
 
 	function logout()
 	{
-		$_SESSION['user_id'] = 0;
+		// $_SESSION['user_id'] = 0;
+		$_SESSION['user'] = null;
 		$msg = 'You are logged out successfully.';
 		$color = 'green';
 		header("Location: {$this->app['pathUrl']}/Login.php?msg={$msg}&color={$color}");
 		exit;
 	} // logout()
 
+	function getCols($on) {
+		$cols['headers'] = '';
+		$cols['fields'] = '';
+		$cols['count'] = 0;
+
+		foreach ($this->tbl['cols'] as $key => $col) {
+			if ($col['is display'][$on] === false) {
+				continue;
+			}
+			
+			$cols['headers'] .= "<th scope=\"col\">{$col['display as']}</th>";
+			$cols['fields'] .= "{$this->tbl['name']}.{$key}, ";
+			$cols['count']++;
+			// Maybe limit cols['headers']/values to 10 or some columns
+		} // foreach (tbl['cols'])
+
+		$cols['fields'] = rtrim($cols['fields'],', ');
+
+		return $cols;
+	}
+
 	function __destruct() {
 		if ($this->showHTML) {
 				?>
 				<footer>
-					<h6><?= $this->app['nameShort'].' - '.$this->app['version'] ?> &copy; 2023</h6>
+					<h6><?= $this->app['nameShort'].' - '.$this->app['version'] ?> &copy; <?= date('Y') ?></h6>
 				</footer>
 				</body>
 				</html>
@@ -421,7 +442,7 @@ class PRC
 	} // __destruct()
 } // class PRC
 
-function pr($value,$name)
+function pr($value,$name=null)
 {
 	$count = is_countable($value) ? count($value) : null;
 
@@ -429,3 +450,18 @@ function pr($value,$name)
 	print_r($value);
 	echo '</pre>';
 } // pr()
+
+function prd($value,$name=null)
+{
+	pr($value,$name);
+
+	die("Self die");
+} // prd()
+
+function showMsg() {
+	if (!empty($_GET['msg'])) {
+		echo "<p style=\"color:{$_GET['color']}\">{$_GET['msg']}</p>";
+		// $_GET['msg'] = '';
+		// $_GET['color'] = '';
+	} // if GET msg
+} // showMsg()

@@ -6,7 +6,7 @@ class Example1 extends PRC
 {
     function __construct()
     {
-      $this->tblName = 'example1';
+      $this->tbl['name'] = 'example1';
 
       parent::__construct();
 
@@ -34,9 +34,9 @@ class Example1 extends PRC
           ),
           'is required' => true,
         ),
-        'date' => array(
-          'type' => 'date',
-          'display as' => 'Date',
+        'desc' => array(
+          'type' => 'text',
+          'display as' => 'Description',
           'is display' => array(
             'on listing' => true,
             'on view' => true,
