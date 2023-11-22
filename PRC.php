@@ -7,7 +7,7 @@ class PRC
 		'name' => 'PHP RAD CRUD',
 		'nameShort' => 'PRC',
 		'desc' => 'PHP - PHP: Hypertext Preprocessor. RAD - Rapid Application Development. CRUD - Create, Read, Update and Delete',
-		'version' => '0.1.1',
+		'version' => '0.1.2',
 		'developer' => 'Aamir Shahzad',
 		'path' => '/opt/lampp/htdocs/PRC',
 		'pathUrl' => 'http://localhost/PRC',
@@ -58,13 +58,13 @@ class PRC
 			</head>
 			<body>
 			<header>
-				<h1><a class="txt-dec" href="<?= $app['pathUrl'] ?>"><?= $this->app['name'] ?></a></h1>
+				<h1><a href="<?= $this->app['pathUrl'] ?>"><?= $this->app['name'] ?></a></h1>
 			</header>
 			<nav>
 				<?php
 				if (!empty($_SESSION['user'])) {
 					$dir = $this->app['path'].'/';
-					$all = array_diff(scandir($dir), [".", "..", ".git"]);
+					$all = array_diff(scandir($dir), ['.', '..', '.git', '.github']);
 
 					foreach ($all as $ff) {
 						if (is_dir($dir . $ff)) {
@@ -84,7 +84,8 @@ class PRC
 	{
 		$cols = $this->getCols('on listing');
 
-		$sql = "SELECT {$cols['fields']} FROM {$this->tbl['name']};";
+		$sql = "SELECT {$this->tbl['name']}.id, {$cols['fields']} FROM {$this->tbl['name']};";
+		// prd($sql,'$sql');
 
 		$result = mysqli_query(
 			$this->dbConn,
@@ -97,7 +98,7 @@ class PRC
 		} // if num_rows
 		?>
 		<main>
-			<h2><?= $this->tbl['nameUcF'] ?> <a href="<?= $this->app['pathUrl'].'/'.$this->tbl['nameUcF'] ?>/Add.php" style="text-decoration: none;">+ <small>(add new record)</small></a></h2>
+			<h2><?= $this->tbl['nameUcF'] ?> Records <a href="<?= $this->app['pathUrl'].'/'.$this->tbl['nameUcF'] ?>/Add.php" style="text-decoration: none;">+ <small>(add new)</small></a></h2>
 			<?php
 			showMsg();
 			?>
@@ -131,7 +132,11 @@ class PRC
 									echo "<td>{$row[$key]}</td>";
 								} // foreach (tbl['cols'])
 
-								echo "<td><a href=\"{$this->app['pathUrl']}/{$this->tbl['nameUcF']}/View.php\">View</a> | <a href=\"#\">Edit</a> | <a href=\"#\">Delete</a></td>";
+								echo "<td>
+									<a href=\"{$this->app['pathUrl']}/{$this->tbl['nameUcF']}/View.php?id={$row['id']}\">View</a> |
+									<a href=\"#\">Edit</a> (not working) | 
+									<a href=\"#\">Delete</a> (not working)
+								</td>";
 								?>
 							</tr>
 							<?php
@@ -149,22 +154,11 @@ class PRC
 		<?php
 	} // list()
 
-	function view()
+	function view($id)
 	{
-		$fields = '';
+		$cols = $this->getCols('on view');
 
-		foreach ($this->tbl['cols'] as $key => $col) {
-			if ($col['is display']['on view'] === false) {
-				continue;
-			}
-			
-			$fields .= "{$this->tbl['name']}.{$key}, ";
-			// Maybe limit headers/values to 10 or some columns
-		} // foreach (tbl['cols'])
-		
-		$fields = rtrim($fields,', ');
-
-		$sql = "SELECT $fields FROM {$this->tbl['name']};";
+		$sql = "SELECT {$cols['fields']} FROM {$this->tbl['name']} WHERE id = $id;";
 
 		$result = mysqli_query(
 			$this->dbConn,
@@ -173,21 +167,26 @@ class PRC
 
 		if (mysqli_num_rows($result)) {
 			$row = mysqli_fetch_assoc($result);
-			$cols = array_keys($row);
-			pr($cols,'$cols');
 		} // if num_rows
 		?>
 		<main>
-			<h2><?= $this->tbl['nameUcF'] ?></h2>
-			
+			<h2><?= $this->tbl['nameUcF'] ?> Record</h2>
+			<?php
+			foreach ($this->tbl['cols'] as $key => $col) {
+				if ($col['is display']['on view'] === false) {
+					continue;
+				}
+
+				echo "<h3>{$col['display as']}</h3>";
+				echo "<p>{$row[$key]}</p>";
+			} // foreach (tbl['cols'])
+			?>
 		</main>
 		<?php
 	} // view
 
 	function add()
 	{
-		$tblName = ucfirst($this->tbl['isPlural'] ? rtrim($this->tbl['name'],'s') : $this->tbl['name']);
-
 		if (!empty($_POST)) {
 			// pr($_POST,'$_POST');
 			$cols = $this->getCols('on add');
@@ -225,7 +224,7 @@ class PRC
 		} // if post
 		?>
 		<main>
-			<h2>Add <?= $tblName ?></h2>
+			<h2>Add <?= $this->tbl['nameUcF'] ?> Record</h2>
 			<form method="post">
 				<?php
 				foreach ($this->tbl['cols'] as $key => $col) {
@@ -248,7 +247,7 @@ class PRC
 				} // foreach
 				?>
 				<br>
-				<button class="btn btn-primary py-2" type="submit">Add <?= $tblName ?></button>
+				<button class="btn btn-primary py-2" type="submit">Add <?= $this->tbl['nameUcF'] ?> Record</button>
 			</form>
 		</main>
 		<?php

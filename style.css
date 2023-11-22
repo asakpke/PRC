@@ -3,6 +3,10 @@ table, th, td {
   border-collapse: collapse;
 }
 
-.txt-dec {
+a {
   text-decoration: none;
 }
+
+/* .txt-dec-no {
+  text-decoration: none;
+} */

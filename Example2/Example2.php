@@ -16,7 +16,7 @@ class Example2 extends PRC
           'display as' => 'ID',
           'is display' => array(
             'on listing' => true,
-            'on view' => false,
+            'on view' => true,
             'on add' => false,
             'on edit' => false,
           ),

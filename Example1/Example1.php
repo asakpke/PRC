@@ -12,17 +12,17 @@ class Example1 extends PRC
 
       // $this->auth = "WHERE user_id = {$_SESSION['user_id']}"; // we may adjust or fix it later on
       $this->tbl['cols'] = array(
-        'id' => array(
-          'type' => 'text',
-          'display as' => 'ID',
-          'is display' => array(
-            'on listing' => true,
-            'on view' => false,
-            'on add' => false,
-            'on edit' => false,
-          ),
-          'is required' => true,
-        ),
+        // 'id' => array(
+        //   'type' => 'text',
+        //   'display as' => 'ID',
+        //   'is display' => array(
+        //     'on listing' => false,
+        //     'on view' => false,
+        //     'on add' => false,
+        //     'on edit' => false,
+        //   ),
+        //   'is required' => true,
+        // ),
         'name' => array(
           'type' => 'text',
           'display as' => 'Name',
