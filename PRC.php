@@ -6,11 +6,9 @@ class PRC
 	protected $app = array(
 		'name' => 'PHP RAD CRUD',
 		'nameShort' => 'PRC',
-		'desc' => 'PHP - PHP: Hypertext Preprocessor <br>
-			RAD - Rapid Application Development <br>
-			CRUD - Create, Read, Update and Delete <br>',
+		'desc' => 'PHP - PHP: Hypertext Preprocessor. RAD - Rapid Application Development. CRUD - Create, Read, Update and Delete',
 		'version' => '0.1.1',
-		'author' => 'Aamir Shahzad',
+		'developer' => 'Aamir Shahzad',
 		'path' => '/opt/lampp/htdocs/PRC',
 		'pathUrl' => 'http://localhost/PRC',
 		// 'isSignup' => false,
@@ -53,7 +51,7 @@ class PRC
 					<meta charset="utf-8">
 					<meta name="viewport" content="width=device-width, initial-scale=1">
 					<meta name="description" content="<?= $this->app['desc'] ?>">
-					<meta name="author" content="<?= $this->app['author'] ?>">
+					<meta name="author" content="<?= $this->app['developer'] ?>">
 					<meta name="generator" content="<?= $this->app['nameShort'].' '.$this->app['version'] ?>">
 					<title><?= $this->app['nameShort'].' - '.$this->app['name'] ?></title>
 					<link href="<?= $this->app['pathUrl'] ?>/style.css?v=<?= $this->app['version'] ?>" rel="stylesheet">
