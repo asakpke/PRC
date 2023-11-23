@@ -134,7 +134,7 @@ class PRC
 
 								echo "<td>
 									<a href=\"{$this->app['pathUrl']}/{$this->tbl['nameUcF']}/View.php?id={$row['id']}\">View</a> |
-									<a href=\"#\">Edit</a> (not working) | 
+									<a href=\"{$this->app['pathUrl']}/{$this->tbl['nameUcF']}/Edit.php?id={$row['id']}\">Edit</a> | 
 									<a href=\"#\">Delete</a> (not working)
 								</td>";
 								?>
@@ -188,15 +188,11 @@ class PRC
 	function add()
 	{
 		if (!empty($_POST)) {
-			// pr($_POST,'$_POST');
 			$cols = $this->getCols('on add');
-			// pr($cols,'$cols');
 			$values = '';
 			$values = str_pad($values, $cols['count']*2-1, '?,'); // -1 to remove last ,
-			// pr($values,'$values');
 
 			$sql = "INSERT INTO {$this->tbl['name']}({$cols['fields']}) VALUES ({$values});";
-			// pr($sql,'$sql');
 			
 			$stmt = mysqli_prepare(
 				$this->dbConn,
@@ -205,20 +201,18 @@ class PRC
 
 			$values = '';
 			$values = str_pad($values, $cols['count'], 's');
-			// pr($values,'$values');
-			
+
 			mysqli_stmt_bind_param(
 				$stmt,
 				$values, // i	int, d	float, s string
 				...array_values($_POST),
 			);
-			
+
 			mysqli_stmt_execute($stmt);
 
 			$msg = "{$this->tbl['nameUcF']} record added successfully.";
 			$color = 'green';
 			$loc = "{$this->app['pathUrl']}/{$this->tbl['nameUcF']}/index.php?msg={$msg}&color={$color}";
-			pr($loc,'$loc');
 			header("Location: $loc");
 			exit;
 		} // if post
@@ -252,6 +246,87 @@ class PRC
 		</main>
 		<?php
 	} // add
+
+	function edit($id)
+	{
+		if (!empty($_POST)) {
+			$set = '';
+
+			foreach ($_POST as $key => $value) {
+				$set .= "$key = ?, ";
+			}
+
+			$set = rtrim($set,', ');
+
+			$sql = "UPDATE {$this->tbl['name']} SET $set WHERE id = $id;";
+			
+			$stmt = mysqli_prepare(
+				$this->dbConn,
+				$sql
+			);
+
+			$values = '';
+			$values = str_pad($values, count($_POST), 's');
+			
+			mysqli_stmt_bind_param(
+				$stmt,
+				$values, // i	int, d	float, s string
+				...array_values($_POST),
+			);
+			
+			mysqli_stmt_execute($stmt);
+
+			$msg = "{$this->tbl['nameUcF']} record updated successfully.";
+			$color = 'green';
+			$loc = "{$this->app['pathUrl']}/{$this->tbl['nameUcF']}/index.php?msg={$msg}&color={$color}";
+			header("Location: $loc");
+			exit;
+		} // if post
+		else {
+			$cols = $this->getCols('on edit');
+
+			$sql = "SELECT {$this->tbl['name']}.id, {$cols['fields']} FROM {$this->tbl['name']} WHERE id = $id LIMIT 1;";
+			// prd($sql,'$sql');
+
+			$result = mysqli_query(
+				$this->dbConn,
+				$sql
+			);
+
+			if (mysqli_num_rows($result)) {
+				$row = mysqli_fetch_assoc($result);
+			} // if num_rows
+		} // else/if post
+		?>
+		<main>
+			<h2>Edit <?= $this->tbl['nameUcF'] ?> Record</h2>
+			<form method="post">
+				<?php
+				foreach ($this->tbl['cols'] as $key => $col) {
+					if ($col['is display']['on add'] === false) {
+						continue;
+					}
+					?>
+					<div>
+						<input
+							type="<?= $col['type'] ?>"
+							name="<?= $key ?>"
+							id="<?= $key ?>"
+							placeholder="Enter <?= $key ?>"
+							value="<?= !empty($_POST[$key]) ? $_POST[$key] : $row[$key] ?>"
+							<?= $col['is required'] ? 'required' : '' ?>
+						>
+						<label for="<?= $key ?>"><?= $col['display as'] ?></label>
+					</div>
+					<?php
+				} // foreach
+				?>
+				<br>
+				<button class="btn btn-primary py-2" type="submit">Update <?= $this->tbl['nameUcF'] ?> Record</button>
+			</form>
+		</main>
+		<?php
+	} // edit
 
 	function blob($id, $name)
 	{
@@ -455,7 +530,8 @@ function prd($value,$name=null)
 	die("Self die");
 } // prd()
 
-function showMsg() {
+function showMsg() 
+{
 	if (!empty($_GET['msg'])) {
 		echo "<p style=\"color:{$_GET['color']}\">{$_GET['msg']}</p>";
 		// $_GET['msg'] = '';
