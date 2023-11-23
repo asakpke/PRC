@@ -54,6 +54,10 @@ class PRC
 					<meta name="author" content="<?= $this->app['developer'] ?>">
 					<meta name="generator" content="<?= $this->app['nameShort'].' '.$this->app['version'] ?>">
 					<title><?= $this->app['nameShort'].' - '.$this->app['name'] ?></title>
+					<link rel="apple-touch-icon" sizes="180x180" href="<?= $this->app['pathUrl'] ?>/apple-touch-icon.png">
+					<link rel="icon" type="image/png" sizes="32x32" href="<?= $this->app['pathUrl'] ?>/favicon-32x32.png">
+					<link rel="icon" type="image/png" sizes="16x16" href="<?= $this->app['pathUrl'] ?>/favicon-16x16.png">
+					<link rel="manifest" href="<?= $this->app['pathUrl'] ?>/site.webmanifest">
 					<link href="<?= $this->app['pathUrl'] ?>/style.css?v=<?= $this->app['version'] ?>" rel="stylesheet">
 			</head>
 			<body>
@@ -98,7 +102,7 @@ class PRC
 		} // if num_rows
 		?>
 		<main>
-			<h2><?= $this->tbl['nameUcF'] ?> Records <a href="<?= $this->app['pathUrl'].'/'.$this->tbl['nameUcF'] ?>/Add.php" style="text-decoration: none;">+ <small>(add new)</small></a></h2>
+			<h2><?= $this->tbl['nameUcF'] ?> Records <a href="<?= $this->app['pathUrl'].'/'.$this->tbl['nameUcF'] ?>/Add.php" title="Add new record">+</a></h2>
 			<?php
 			showMsg();
 			?>
@@ -135,7 +139,7 @@ class PRC
 								echo "<td>
 									<a href=\"{$this->app['pathUrl']}/{$this->tbl['nameUcF']}/View.php?id={$row['id']}\">View</a> |
 									<a href=\"{$this->app['pathUrl']}/{$this->tbl['nameUcF']}/Edit.php?id={$row['id']}\">Edit</a> | 
-									<a href=\"#\">Delete</a> (not working)
+									<a href=\"{$this->app['pathUrl']}/{$this->tbl['nameUcF']}/Delete.php?id={$row['id']}\">Delete</a>
 								</td>";
 								?>
 							</tr>
@@ -183,7 +187,7 @@ class PRC
 			?>
 		</main>
 		<?php
-	} // view
+	} // view()
 
 	function add()
 	{
@@ -245,7 +249,7 @@ class PRC
 			</form>
 		</main>
 		<?php
-	} // add
+	} // add()
 
 	function edit($id)
 	{
@@ -326,7 +330,28 @@ class PRC
 			</form>
 		</main>
 		<?php
-	} // edit
+	} // edit()
+
+	function delete($id)
+	{
+		$result = mysqli_query(
+			$this->dbConn,
+			"DELETE FROM {$this->tbl['name']} WHERE id = $id;"
+		);
+
+		if ($result) {
+			$msg = "{$this->tbl['nameUcF']} record deleted successfully.";
+			$color = 'green';
+		} // if result
+		else {
+			$msg = "Error in deleting {$this->tbl['nameUcF']} record.";
+			$color = 'red';
+		}
+		
+		$loc = "{$this->app['pathUrl']}/{$this->tbl['nameUcF']}/index.php?msg={$msg}&color={$color}";
+		header("Location: $loc");
+		exit;
+	} // delete()
 
 	function blob($id, $name)
 	{
