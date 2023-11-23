@@ -7,7 +7,7 @@ class PRC
 		'name' => 'PHP RAD CRUD',
 		'nameShort' => 'PRC',
 		'desc' => 'PHP - PHP: Hypertext Preprocessor. RAD - Rapid Application Development. CRUD - Create, Read, Update and Delete',
-		'version' => '0.1.2',
+		'version' => '0.1.3',
 		'developer' => 'Aamir Shahzad',
 		'path' => '/opt/lampp/htdocs/PRC',
 		'pathUrl' => 'http://localhost/PRC',
@@ -87,10 +87,7 @@ class PRC
 	function list()
 	{
 		$cols = $this->getCols('on listing');
-
 		$sql = "SELECT {$this->tbl['name']}.id, {$cols['fields']} FROM {$this->tbl['name']};";
-		// prd($sql,'$sql');
-
 		$result = mysqli_query(
 			$this->dbConn,
 			$sql
@@ -98,7 +95,6 @@ class PRC
 
 		if (mysqli_num_rows($result)) {
 			$row = mysqli_fetch_assoc($result);
-			// $cols = array_keys($row);
 		} // if num_rows
 		?>
 		<main>
@@ -290,8 +286,6 @@ class PRC
 			$cols = $this->getCols('on edit');
 
 			$sql = "SELECT {$this->tbl['name']}.id, {$cols['fields']} FROM {$this->tbl['name']} WHERE id = $id LIMIT 1;";
-			// prd($sql,'$sql');
-
 			$result = mysqli_query(
 				$this->dbConn,
 				$sql
@@ -358,11 +352,7 @@ class PRC
 		$stmt = mysqli_prepare(
 			$this->dbConn,
 			"SELECT {$this->tbl['name']}.$name FROM {$this->tbl['name']} WHERE {$this->tbl['name']}.id = ? LIMIT 1;"
-			// "SELECT {$this->tbl['name']}.$name FROM {$this->tbl['name']} {$this->auth} AND {$this->tbl['name']}.id = ? LIMIT 1;"
 		);
-
-		// print_r($result);
-
 		mysqli_stmt_bind_param($stmt, "i", $id);
 
 		if (mysqli_stmt_execute($stmt) === true) {
@@ -448,7 +438,6 @@ class PRC
 				$row = $result->fetch_assoc();
 
 				if (!empty($row)) {
-					// $_SESSION['user_id'] = $row['id'];
 					$_SESSION['user'] = $row;
 					$color = 'green';
 					header("Location: {$this->app['pathUrl']}/index.php?msg={$msg}&color={$color}");
@@ -495,7 +484,6 @@ class PRC
 
 	function logout()
 	{
-		// $_SESSION['user_id'] = 0;
 		$_SESSION['user'] = null;
 		$msg = 'You are logged out successfully.';
 		$color = 'green';
@@ -559,7 +547,5 @@ function showMsg()
 {
 	if (!empty($_GET['msg'])) {
 		echo "<p style=\"color:{$_GET['color']}\">{$_GET['msg']}</p>";
-		// $_GET['msg'] = '';
-		// $_GET['color'] = '';
 	} // if GET msg
 } // showMsg()
